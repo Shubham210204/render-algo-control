@@ -68,22 +68,30 @@
         const logOutput = document.getElementById('logOutput');
         const statusText = document.getElementById('statusText');
 
+        // Run button
         document.getElementById('runBtn').onclick = () => {
+            logOutput.innerHTML += "<span style='color:lightgreen'>✔ Script started...</span><br>";
             socket.emit('start_script');
         };
+
+        // Stop button
         document.getElementById('stopBtn').onclick = () => {
+            logOutput.innerHTML += "<span style='color:red'>⛔ Script stopped.</span><br>";
             socket.emit('stop_script');
         };
 
-        socket.on('log', data => {
-            logOutput.innerHTML += data + '<br>';
+        // Listen for log messages from backend
+        socket.on('log', (data) => {
+            logOutput.innerHTML += data + "<br>";
             logOutput.scrollTop = logOutput.scrollHeight;
         });
 
-        socket.on('status', data => {
+        // Listen for status updates from backend
+        socket.on('status', (data) => {
             statusText.innerHTML = data;
         });
     </script>
+
 </body>
 
 </html>
