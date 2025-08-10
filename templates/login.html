@@ -8,33 +8,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="flex items-center justify-center min-h-screen bg-gray-900 text-white">
 
-    <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-sm">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg w-96">
+        <h2 class="text-3xl font-bold text-center mb-6 text-white">Login</h2>
 
-        {% if error %}
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
-            {{ error }}
-        </div>
-        {% endif %}
+        <form method="POST" class="space-y-5">
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-sm font-medium">Username</label>
+                <input type="text" name="username" id="username"
+                    class="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-700 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required>
+            </div>
 
-        <form method="POST" class="space-y-4">
-            <input type="text" name="username" placeholder="Username" required
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-medium">Password</label>
+                <input type="password" name="password" id="password"
+                    class="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-700 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required>
+            </div>
 
-            <input type="password" name="password" placeholder="Password" required
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-
+            <!-- Login Button -->
             <button type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition">
+                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition duration-300">
                 Login
             </button>
         </form>
-
-        <p class="text-center text-sm text-gray-500 mt-4">
-            Forgot your password? <a href="#" class="text-blue-500 hover:underline">Reset it</a>
-        </p>
     </div>
 
 </body>
