@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import subprocess
@@ -6,7 +9,7 @@ import os
 import signal
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 process = None
 
@@ -19,7 +22,7 @@ def start_script():
     global process
     if process is None or process.poll() is not None:
         process = subprocess.Popen(
-            ["python", "algo.py"],
+            ["python", "-u", "algo.py"],  # Unbuffered
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
