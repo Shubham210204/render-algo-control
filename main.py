@@ -1,7 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, render_template,  request, redirect, url_for, session
+from flask import Flask, render_template
 from flask_socketio import SocketIO
 import subprocess
 import threading
@@ -13,34 +13,9 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 process = None
 
-# Login page
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        # Simple authentication check (replace with your logic)
-        if username == "admin" and password == "1234":
-            session['logged_in'] = True
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html', error="Invalid credentials")
-
-    return render_template('login.html')
-
-# Index page
 @app.route('/')
 def index():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     return render_template('index.html')
-
-# Logout
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
 
 @socketio.on('start_script')
 def start_script():
