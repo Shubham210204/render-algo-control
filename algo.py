@@ -1,7 +1,7 @@
 import time
 import datetime
 import sys
-import pytz  # install with: pip install pytz
+import pytz
 
 # Define IST timezone
 ist = pytz.timezone('Asia/Kolkata')
