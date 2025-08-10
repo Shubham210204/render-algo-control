@@ -1,18 +1,14 @@
-# import time
-# import random
-# import sys
-
-# while True:
-#     print(f"Running algo... Value: {random.randint(1,100)}")
-#     sys.stdout.flush()  # flush immediately
-#     time.sleep(2)
-
 import time
 import datetime
 import sys
+import pytz  # install with: pip install pytz
+
+# Define IST timezone
+ist = pytz.timezone('Asia/Kolkata')
 
 while True:
-    now = datetime.datetime.now()  # get current date and time
-    print(f"Alive from: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-    sys.stdout.flush()  # flush immediately
-    time.sleep(3600)  # wait 1 hour (3600 seconds)
+    now = datetime.datetime.now(ist)  # get current date and time in IST
+    print(f"Current date and time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    sys.stdout.flush()
+    time.sleep(3600)  # wait 1 hour
+

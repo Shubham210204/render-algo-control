@@ -24,7 +24,7 @@ def login():
         password = request.form.get("password")
 
         # Simple hardcoded login check
-        if username == "admin" and password == "1234":
+        if username == os.getenv("username") and password == os.getenv("password"):
             session["user"] = username
             return redirect(url_for("index"))
         else:
