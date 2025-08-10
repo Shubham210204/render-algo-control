@@ -22,11 +22,21 @@
             padding: 10px;
             background: #f8f8f8;
         }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Algo Control Panel</h1>
+    <div class="top-bar">
+        <h1>Algo Control Panel</h1>
+        <button onclick="window.location.href='/logout'">🚪 Logout</button>
+    </div>
+
     <button onclick="startScript()">▶ Run</button>
     <button onclick="stopScript()">⏹ Stop</button>
     <div id="logs"></div>
