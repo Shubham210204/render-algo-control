@@ -1,42 +1,50 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template
 from flask_socketio import SocketIO
 import subprocess
-import sys
+import threading
+import os
+import signal
 
 app = Flask(__name__)
-app.secret_key = "yoursecretkey"  # Change to a strong secret
-socketio = SocketIO(app)
-
-# Dummy credentials (replace with database check if needed)
-USERNAME = "admin"
-PASSWORD = "1234"
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 process = None
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        if username == USERNAME and password == PASSWORD:
-            session["logged_in"] = True
-            return redirect(url_for("index"))
-        else:
-            return render_template("login.html", error="Invalid username or password")
-    return render_template("login.html")
-
-@app.route("/")
+@app.route('/')
 def index():
-    if not session.get("logged_in"):
-        return redirect(url_for("login"))
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
+@socketio.on('start_script')
+def start_script():
+    global process
+    if process is None or process.poll() is not None:
+        process = subprocess.Popen(
+            ["python", "-u", "algo.py"],  # Unbuffered
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+        threading.Thread(target=stream_logs, args=(process.stdout,), daemon=True).start()
+        socketio.emit('log', '✅ Script started...')
+    else:
+        socketio.emit('log', '⚠ Script is already running.')
 
-# Your existing socket.io event handlers go here...
+def stream_logs(pipe):
+    for line in pipe:
+        socketio.emit('log', line.strip())
 
-if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000)
+@socketio.on('stop_script')
+def stop_script():
+    global process
+    if process and process.poll() is None:
+        os.kill(process.pid, signal.SIGTERM)
+        socketio.emit('log', '🛑 Script stopped.')
+    else:
+        socketio.emit('log', '⚠ No running script.')
+
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000)
