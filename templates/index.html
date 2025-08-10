@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Algo Control Panel</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+
+        #logs {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+            background: #f8f8f8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Algo Control Panel</h1>
+    <button onclick="startScript()">▶ Run</button>
+    <button onclick="stopScript()">⏹ Stop</button>
+    <div id="logs"></div>
+
+    <script>
+        var socket = io();
+
+        function startScript() {
+            socket.emit('start_script');
+        }
+
+        function stopScript() {
+            socket.emit('stop_script');
+        }
+
+        socket.on('log', function (data) {
+            var logs = document.getElementById('logs');
+            logs.innerHTML += data + "<br>";
+            logs.scrollTop = logs.scrollHeight;
+        });
+    </script>
+</body>
+
+</html>
