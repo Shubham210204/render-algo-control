@@ -101,6 +101,7 @@
         <div>
             <button onclick="startScript()" class="primary">▶ Run</button>
             <button onclick="stopScript()" class="danger">⏹ Stop</button>
+            <button onclick="clearLogs()" class="secondary">🧹 Clear Logs</button>
         </div>
 
         <h3 style="color: #bbb;">Logs</h3>
@@ -118,10 +119,19 @@
             socket.emit('stop_script');
         }
 
+        function clearLogs() {
+            socket.emit('clear_logs');
+            document.getElementById('logs').innerHTML = "";
+        }
+
         socket.on('log', function (data) {
-            var logs = document.getElementById('logs');
-            logs.innerHTML += data + "<br>";
-            logs.scrollTop = logs.scrollHeight;
+            var logsDiv = document.getElementById('logs');
+            logsDiv.innerHTML += data + "<br>";
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        });
+
+        socket.on('clear_logs', function () {
+            document.getElementById('logs').innerHTML = "";
         });
     </script>
 </body>

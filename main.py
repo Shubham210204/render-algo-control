@@ -40,9 +40,7 @@ def index():
 
 @app.route("/logout")
 def logout():
-    global logs
     session.pop("user", None)
-    logs.clear()  # Clear logs on logout
     return redirect(url_for("login"))
 
 # ---------------- SOCKET.IO EVENTS ---------------- #
@@ -56,6 +54,7 @@ def on_connect():
 def start_script():
     global process, is_running
     if process is None or process.poll() is not None:
+        # Do not clear logs here — they persist until user manually clears
         is_running = True
         log_message("✅ Script started...")
 
@@ -84,6 +83,13 @@ def stop_script():
         log_message("🛑 Script stopped.")
     else:
         log_message("⚠ No running script.")
+
+@socketio.on('clear_logs')
+def clear_logs():
+    """Clear all stored logs and notify clients."""
+    global logs
+    logs = []
+    socketio.emit('clear_logs')  # Let frontend know to clear display
 
 # ---------------- HELPER FUNCTION ---------------- #
 def log_message(message):
