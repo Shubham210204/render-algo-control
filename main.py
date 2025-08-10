@@ -40,7 +40,9 @@ def index():
 
 @app.route("/logout")
 def logout():
+    global logs
     session.pop("user", None)
+    logs.clear()  # Clear logs on logout
     return redirect(url_for("login"))
 
 # ---------------- SOCKET.IO EVENTS ---------------- #
@@ -52,9 +54,8 @@ def on_connect():
 
 @socketio.on('start_script')
 def start_script():
-    global process, logs, is_running
+    global process, is_running
     if process is None or process.poll() is not None:
-        logs = []  # Clear old logs when starting fresh
         is_running = True
         log_message("✅ Script started...")
 
