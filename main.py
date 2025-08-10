@@ -13,8 +13,10 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 app.secret_key = "your-secret-key"
 
 process = None
+logs = []  # Store logs in memory
+is_running = False
 
-# Login route
+# ---------------- LOGIN ROUTES ---------------- #
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -41,10 +43,21 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
+# ---------------- SOCKET.IO EVENTS ---------------- #
+@socketio.on('connect')
+def on_connect():
+    """When a user connects, send all stored logs."""
+    for log in logs:
+        socketio.emit('log', log)
+
 @socketio.on('start_script')
 def start_script():
-    global process
+    global process, logs, is_running
     if process is None or process.poll() is not None:
+        logs = []  # Clear old logs when starting fresh
+        is_running = True
+        log_message("✅ Script started...")
+
         process = subprocess.Popen(
             ["python", "-u", "algo.py"],  # Unbuffered
             stdout=subprocess.PIPE,
@@ -53,22 +66,30 @@ def start_script():
             bufsize=1
         )
         threading.Thread(target=stream_logs, args=(process.stdout,), daemon=True).start()
-        socketio.emit('log', '✅ Script started...')
     else:
-        socketio.emit('log', '⚠ Script is already running.')
+        log_message("⚠ Script is already running.")
 
 def stream_logs(pipe):
+    """Read process output line-by-line, store and send."""
     for line in pipe:
-        socketio.emit('log', line.strip())
+        log_message(line.strip())
 
 @socketio.on('stop_script')
 def stop_script():
-    global process
+    global process, is_running
     if process and process.poll() is None:
         os.kill(process.pid, signal.SIGTERM)
-        socketio.emit('log', '🛑 Script stopped.')
+        is_running = False
+        log_message("🛑 Script stopped.")
     else:
-        socketio.emit('log', '⚠ No running script.')
+        log_message("⚠ No running script.")
 
+# ---------------- HELPER FUNCTION ---------------- #
+def log_message(message):
+    """Store logs in memory and emit to clients."""
+    logs.append(message)
+    socketio.emit('log', message)
+
+# ---------------- MAIN ---------------- #
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
