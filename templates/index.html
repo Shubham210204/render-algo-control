@@ -1,75 +1,53 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Algo Control Panel</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: sans-serif;
+            margin: 20px;
         }
-        h1 {
-            display: inline-block;
-        }
-        .logout {
-            float: right;
-            margin-top: 10px;
-        }
+
         button {
-            padding: 8px 12px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #controls {
-            margin-top: 20px;
-        }
-        #logs {
-            margin-top: 20px;
+            margin: 5px;
             padding: 10px;
-            background: #f8f8f8;
-            border: 1px solid #ddd;
+        }
+
+        #logs {
+            border: 1px solid #ccc;
             height: 300px;
             overflow-y: scroll;
-            white-space: pre-wrap;
-        }
-        .status {
-            margin-top: 10px;
+            padding: 10px;
+            background: #f8f8f8;
         }
     </style>
 </head>
+
 <body>
-    <div>
-        <h1>Algo Control Panel</h1>
-        <form method="GET" action="{{ url_for('logout') }}" class="logout">
-            <button type="submit">Logout</button>
-        </form>
-    </div>
-
-    <div id="controls">
-        <button id="runBtn">▶ Run</button>
-        <button id="stopBtn">■ Stop</button>
-    </div>
-
+    <h1>Algo Control Panel</h1>
+    <button onclick="startScript()">▶ Run</button>
+    <button onclick="stopScript()">⏹ Stop</button>
     <div id="logs"></div>
-    <div class="status" id="status"></div>
 
     <script>
-        const runBtn = document.getElementById("runBtn");
-        const stopBtn = document.getElementById("stopBtn");
-        const logs = document.getElementById("logs");
-        const statusDiv = document.getElementById("status");
+        var socket = io();
 
-        runBtn.addEventListener("click", () => {
-            fetch("/run", { method: "POST" });
-        });
+        function startScript() {
+            socket.emit('start_script');
+        }
 
-        stopBtn.addEventListener("click", () => {
-            fetch("/stop", { method: "POST" });
-        });
+        function stopScript() {
+            socket.emit('stop_script');
+        }
 
-        const socket = new WebSocket(`ws://${window.location.host}/logs`);
-        socket.onmessage = (event) => {
-            logs.innerHTML += event.data + "\n";
+        socket.on('log', function (data) {
+            var logs = document.getElementById('logs');
+            logs.innerHTML += data + "<br>";
             logs.scrollTop = logs.scrollHeight;
-        };
+        });
     </script>
 </body>
+
 </html>
