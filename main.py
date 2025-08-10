@@ -36,6 +36,10 @@ def index():
         return redirect(url_for("login"))
     return render_template("index.html")
 
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("login"))
 
 @socketio.on('start_script')
 def start_script():
