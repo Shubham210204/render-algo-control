@@ -9,15 +9,10 @@ import os
 import signal
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+app.secret_key = "your-secret-key"
 
 process = None
-
-from flask import Flask, render_template, request, redirect, url_for, session
-
-app = Flask(__name__)
-app.secret_key = "your-secret-key"  # needed for sessions
 
 # Login route
 @app.route("/login", methods=["GET", "POST"])
@@ -40,11 +35,6 @@ def index():
     if "user" not in session:
         return redirect(url_for("login"))
     return render_template("index.html")
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
 
 
 @socketio.on('start_script')
