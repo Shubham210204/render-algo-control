@@ -77,7 +77,7 @@ def oco_monitor(target_id, sl_id, check_interval=2):
     while True:
         target_status = dhan.get_order_by_id(target_id)['data'][0]['orderStatus']
         sl_status = dhan.get_order_by_id(sl_id)['data'][0]['orderStatus']
-        current_time = datetime.now(ZoneInfo("Asia/Kolkata")).time()
+        current_time = datetime.datetime.now(ZoneInfo("Asia/Kolkata")).time()
         if current_time > datetime.time(15,00):
             print("Time up, closing all orders!!")
             sys.stdout.flush()
@@ -126,7 +126,7 @@ traded_watchlist = []
 
 while True:
      # ---- time preferences ----
-     current_time = datetime.now(ZoneInfo("Asia/Kolkata")).time()
+     current_time = datetime.datetime.now(ZoneInfo("Asia/Kolkata")).time()
      if current_time < datetime.time(9, 20):
           print("wait for market to start", current_time)
           sys.stdout.flush()
