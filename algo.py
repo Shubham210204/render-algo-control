@@ -137,6 +137,59 @@ while True:
           print("Market is over, Bye Bye see you tomorrow", current_time)
           sys.stdout.flush()
           break
+     
+     # ---- loop for each stock ----
+     for stock_name in watchlist:
+        # ---- data fetch ----
+        chart = get_chart(stock_name)
+        stock_id = get_instrument_token(stock_name)
+        is_rising = sma_rising(stock_name)
 
-print("Script ended!!")
+        # ---- bullish candles ----
+        engulf = (  
+            chart.iloc[-3]['Open'] > chart.iloc[-3]['Close'] and
+            chart.iloc[-2]['Open'] < chart.iloc[-3]['Close'] and
+            chart.iloc[-2]['Close'] > chart.iloc[-3]['Open'])
+        red_hammer = (
+            chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
+            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 3 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
+        green_hammer = (
+            chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
+            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 3 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
+        white_soldiers = (
+            chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
+            chart.iloc[-4]['Close'] > chart.iloc[-4]['Open'] and
+            chart.iloc[-3]['Close'] > chart.iloc[-4]['Close'] and
+            chart.iloc[-4]['Close'] > chart.iloc[-5]['Close'])
+
+        # ---- candle formations ----
+        bullish = engulf or red_hammer or green_hammer or white_soldiers
+        crossover = (chart.iloc[-2]['Low'] < chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['High'] > chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['Open'] < chart.iloc[-2]['Close'])
+        confirmation = chart.iloc[-1]['High'] > chart.iloc[-2]['High']
+
+        # ---- trade value calculation ----
+        balance_response = dhan.get_fund_limits()
+        available_balance = balance_response['data']['availabelBalance']
+        leveraged_margin = available_balance * 5
+        buy_price = chart.iloc[-1]['High']
+        target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
+        target = round(target_get, 2)
+        stop_loss_get = chart.iloc[-4]['Low']
+        stop_loss = round(stop_loss_get, 2)
+        qty = 1 # int(leveraged_margin // buy_price)
+
+        # ---- trade conditions ----
+        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < leveraged_margin:
+            # print(chart)
+            print("Bought", stock_name)
+            sys.stdout.flush()
+            buy_id, target_id, sl_id = place_bracket_order(stock_id, qty, target, stop_loss)
+            oco_monitor(target_id, sl_id)
+            print("Sold", qty, "quantity of", stock_name, "with Avg price:", buy_price, ",Target:", target, ",Stop loss:", stop_loss)
+            sys.stdout.flush()   
+            traded_watchlist.append(stock_name)
+            print("Traded stocks:", traded_watchlist)
+            sys.stdout.flush()
+
+print("🛑 Script ended!!")
 sys.stdout.flush()
