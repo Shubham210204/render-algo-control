@@ -2,3 +2,6 @@ Flask
 flask-socketio
 eventlet
 pytz
+dhanhq
+pandas
+yfinance
