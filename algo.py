@@ -123,5 +123,19 @@ watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEE
 
 traded_watchlist = []
 
+while True:
+     # ---- time preferences ----
+     current_time = datetime.datetime.now().time()
+     if current_time < datetime.time(9, 20):
+          print("wait for market to start", current_time)
+          sys.stdout.flush()
+          time.sleep(300)
+          continue
+     if current_time > datetime.time(15,00):
+          traded_watchlist = []
+          print("Market is over, Bye Bye see you tomorrow", current_time)
+          sys.stdout.flush()
+          break
+
 print("Script ended!!")
 sys.stdout.flush()
