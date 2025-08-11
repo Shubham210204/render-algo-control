@@ -6,3 +6,4 @@ dhanhq
 pandas
 yfinance
 datetime
+zoneinfo

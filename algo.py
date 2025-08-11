@@ -5,6 +5,7 @@ import datetime
 import time
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 # ---- credentials ----
 client_id = os.getenv("client_id")
@@ -76,7 +77,7 @@ def oco_monitor(target_id, sl_id, check_interval=2):
     while True:
         target_status = dhan.get_order_by_id(target_id)['data'][0]['orderStatus']
         sl_status = dhan.get_order_by_id(sl_id)['data'][0]['orderStatus']
-        current_time = datetime.datetime.now().time()
+        current_time = datetime.now(ZoneInfo("Asia/Kolkata")).time()
         if current_time > datetime.time(15,00):
             print("Time up, closing all orders!!")
             sys.stdout.flush()
@@ -119,13 +120,13 @@ def sma_rising(stock_id):
     else:
         return False
 
-watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC']
+watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEEL','GAIL','BHEL','ONGC','BANKBARODA','WIPRO','POWERGRID','ECLERX','BPCL','NTPC','COALINDIA','TATAPOWER','BEL','PFC','ITC','VEDL','VBL','DABUR','JSWENERGY','ADANIPOWER','ATGL','AMBUJACEM','ICICIPRULI','TATAMOTORS','HINDALCO','IRCTC','HDFCLIFE','DLF','SBIN','INDUSINDBK','BAJFINANCE','LICI','ADANIGREEN','ZYDUSLIFE','JINDALSTEL','TATACONSUM','JSWSTEEL','AXISBANK','DRREDDY','GODREJCP','LODHA','UBL','ADANIPORTS','NAUKRI','RELIANCE','INFY','ICICIBANK','HCLTECH','TECHM','CHOLAFIN','CIPLA','HAVELLS','SUNPHARMA','SBILIFE','ICICIGI','BAJAJFINSV','BHARTIARTL','KOTAKBANK','HDFCBANK','NESTLEIND','ADANIENT','ASIANPAINT','HINDUNILVR','GRASIM','TVSMOTOR','TCS','PIDILITIND','SIEMENS','M&M','TITAN','TORNTPHARM','LT','DMART','HAL','HEROMOTOCO','LTIM','ABB','TRENT','BRITANNIA','EICHERMOT','INDIGO','DIVISLAB','APOLLOHOSP']
 
 traded_watchlist = []
 
 while True:
      # ---- time preferences ----
-     current_time = datetime.datetime.now().time()
+     current_time = datetime.now(ZoneInfo("Asia/Kolkata")).time()
      if current_time < datetime.time(9, 20):
           print("wait for market to start", current_time)
           sys.stdout.flush()
