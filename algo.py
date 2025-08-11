@@ -1,14 +1,20 @@
-import time
-import datetime
 import sys
-import pytz
+# sys.stdout.flush()
 
-# Define IST timezone
-ist = pytz.timezone('Asia/Kolkata')
+from dhanhq import dhanhq
+import pandas as pd
+import yfinance as yf
+import datetime
+import time
+import os
 
-while True:
-    now = datetime.datetime.now(ist)  # get current date and time in IST
-    print(f"Alive since: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-    sys.stdout.flush()
-    time.sleep(3) 
+# ---- credentials ----
+client_id = os.getenv("client_id")
+access_token = os.getenv("access_token")
+dhan = dhanhq(client_id, access_token)
 
+print(client_id)
+sys.stdout.flush()
+
+print(access_token)
+sys.stdout.flush()
