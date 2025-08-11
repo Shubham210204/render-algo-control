@@ -2,7 +2,6 @@ import eventlet
 eventlet.monkey_patch()
 
 import warnings
-warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO
@@ -10,6 +9,8 @@ import subprocess
 import threading
 import os
 import signal
+
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
