@@ -73,14 +73,15 @@ def place_bracket_order(stock_id, qty, target_price, stoploss_price):
 
     return buy_id, target_id, sl_id
 
-def oco_monitor(target_id, sl_id, check_interval=2):
+def oco_monitor(buy_id, target_id, sl_id, check_interval=2):
     while True:
         target_status = dhan.get_order_by_id(target_id)['data'][0]['orderStatus']
         sl_status = dhan.get_order_by_id(sl_id)['data'][0]['orderStatus']
         current_time = datetime.datetime.now(ZoneInfo("Asia/Kolkata")).time()
         if current_time > datetime.time(15,00):
-            print("Time up, closing all orders!!")
+            print("Time up, closing all orders...")
             sys.stdout.flush()
+            dhan.cancel_order(buy_id)
             dhan.cancel_order(sl_id)
             dhan.cancel_order(target_id)
             break
@@ -133,7 +134,6 @@ while True:
           time.sleep(300)
           continue
      if current_time > datetime.time(15,00):
-          traded_watchlist = []
           print("Market is over, Bye Bye see you tomorrow", current_time)
           sys.stdout.flush()
           break
@@ -152,18 +152,23 @@ while True:
             chart.iloc[-2]['Close'] > chart.iloc[-3]['Open'])
         red_hammer = (
             chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 3 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
+            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
         green_hammer = (
             chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 3 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
+            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
         white_soldiers = (
             chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
             chart.iloc[-4]['Close'] > chart.iloc[-4]['Open'] and
             chart.iloc[-3]['Close'] > chart.iloc[-4]['Close'] and
             chart.iloc[-4]['Close'] > chart.iloc[-5]['Close'])
+        big_green = (
+            chart.iloc[-2]['Open'] == chart.iloc[-2]['Low'] and
+            chart.iloc[-2]['Close'] == chart.iloc[-2]['High'] and
+            chart.iloc[-2]['Close'] > chart.iloc[-2]['Open']
+        )
 
         # ---- candle formations ----
-        bullish = engulf or red_hammer or green_hammer or white_soldiers
+        bullish = engulf or red_hammer or green_hammer or white_soldiers or big_green
         crossover = (chart.iloc[-2]['Low'] < chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['High'] > chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['Open'] < chart.iloc[-2]['Close'])
         confirmation = chart.iloc[-1]['High'] > chart.iloc[-2]['High']
 
@@ -179,13 +184,11 @@ while True:
         qty = 1 # int(leveraged_margin // buy_price)
 
         # ---- trade conditions ----
-        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < leveraged_margin:
-            # print(chart)
-            print("Bought", stock_name)
+        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * leveraged_margin:
+            print("Bought", qty, "quantity of", stock_name, "at:", buy_price, ",Target:", target, ",Stop loss:", stop_loss)
             sys.stdout.flush()
             buy_id, target_id, sl_id = place_bracket_order(stock_id, qty, target, stop_loss)
-            oco_monitor(target_id, sl_id)
-            print("Sold", qty, "quantity of", stock_name, "with Avg price:", buy_price, ",Target:", target, ",Stop loss:", stop_loss)
+            oco_monitor(buy_id, target_id, sl_id)
             sys.stdout.flush()   
             traded_watchlist.append(stock_name)
             print("Traded stocks:", traded_watchlist)
