@@ -23,7 +23,7 @@ def get_instrument_token(stock_name):
         data_dict[trading_symbol][exm_ecxh_id] = row.to_dict()
     return data_dict[stock_name]['NSE']['SEM_SMST_SECURITY_ID']
 
-def place_bracket_order(stock_id, qty, target_price, stoploss_price):
+def place_bracket_order(tock_name, stock_id, qty, target_price, stoploss_price):
     # Step 1: Place BUY order (market)
     buy_order = dhan.place_order(
         security_id=stock_id,
@@ -35,9 +35,9 @@ def place_bracket_order(stock_id, qty, target_price, stoploss_price):
         price=0
     )
     buy_id = buy_order['data']['orderId']
-    print(f"Buy Order Placed: {buy_id}")
+    print("Bought", qty, "quantity of", stock_name, "at:", buy_price, ",Target:", target, ",Stop loss:", stop_loss)
     sys.stdout.flush()
-
+            
     time.sleep(2)
 
     # Step 2: Place Target SELL order
@@ -52,8 +52,6 @@ def place_bracket_order(stock_id, qty, target_price, stoploss_price):
         validity=dhan.DAY
     )
     target_id = target_order['data']['orderId']
-    print(f"Target Order Placed: {target_id}")
-    sys.stdout.flush()
 
     # Step 3: Place Stop Loss SELL order
     sl_order = dhan.place_order(
@@ -68,8 +66,6 @@ def place_bracket_order(stock_id, qty, target_price, stoploss_price):
         validity=dhan.DAY
     )
     sl_id = sl_order['data']['orderId']
-    print(f"Stop Loss Order Placed: {sl_id}")
-    sys.stdout.flush()
 
     return buy_id, target_id, sl_id
 
@@ -178,16 +174,16 @@ while True:
         leveraged_margin = available_balance * 5
         buy_price = chart.iloc[-1]['High']
         target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        target = round(target_get, 2)
+        min_target = buy_price * 1.0125
+        target = round(max(target_get, min_target), 2)
         stop_loss_get = chart.iloc[-4]['Low']
-        stop_loss = round(stop_loss_get, 2)
+        max_stop_loss = buy_price * 0.9925
+        stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
         qty = 1 # int(leveraged_margin // buy_price)
 
         # ---- trade conditions ----
         if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * leveraged_margin:
-            print("Bought", qty, "quantity of", stock_name, "at:", buy_price, ",Target:", target, ",Stop loss:", stop_loss)
-            sys.stdout.flush()
-            buy_id, target_id, sl_id = place_bracket_order(stock_id, qty, target, stop_loss)
+            buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
             oco_monitor(buy_id, target_id, sl_id)
             sys.stdout.flush()   
             traded_watchlist.append(stock_name)
