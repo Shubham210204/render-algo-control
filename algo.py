@@ -69,7 +69,7 @@ def place_bracket_order(tock_name, stock_id, qty, target_price, stoploss_price):
 
     return buy_id, target_id, sl_id
 
-def oco_monitor(buy_id, target_id, sl_id, check_interval=2):
+def oco_monitor(stock_name, buy_id, target_id, sl_id, check_interval=2):
     while True:
         target_status = dhan.get_order_by_id(target_id)['data'][0]['orderStatus']
         sl_status = dhan.get_order_by_id(sl_id)['data'][0]['orderStatus']
@@ -80,6 +80,10 @@ def oco_monitor(buy_id, target_id, sl_id, check_interval=2):
             dhan.cancel_order(buy_id)
             dhan.cancel_order(sl_id)
             dhan.cancel_order(target_id)
+            chart = get_chart(stock_name)
+            current_price = chart.iloc[-1]['Open']
+            print("Sold at price:", current_price)
+            sys.stdout.flush()
             break
         if target_status == "TRADED":
             print("Target hit! Cancelling Stop Loss order...")
@@ -117,7 +121,7 @@ def sma_rising(stock_id):
     else:
         return False
 
-watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEEL','GAIL','BHEL','ONGC','BANKBARODA','WIPRO','POWERGRID','ECLERX','BPCL','NTPC','COALINDIA','TATAPOWER','BEL','PFC','ITC','VEDL','VBL','DABUR','JSWENERGY','ADANIPOWER','ATGL','AMBUJACEM','ICICIPRULI','TATAMOTORS','HINDALCO','IRCTC','HDFCLIFE','DLF','SBIN','INDUSINDBK','BAJFINANCE','LICI','ADANIGREEN','ZYDUSLIFE','JINDALSTEL','TATACONSUM','JSWSTEEL','AXISBANK','DRREDDY','GODREJCP','LODHA','UBL','ADANIPORTS','NAUKRI','RELIANCE','INFY','ICICIBANK','HCLTECH','TECHM','CHOLAFIN','CIPLA','HAVELLS','SUNPHARMA','SBILIFE','ICICIGI','BAJAJFINSV','BHARTIARTL','KOTAKBANK','HDFCBANK','NESTLEIND','ADANIENT','ASIANPAINT','HINDUNILVR','GRASIM','TVSMOTOR','TCS','PIDILITIND','SIEMENS','M&M','TITAN','TORNTPHARM','LT','DMART','HAL','HEROMOTOCO','LTIM','ABB','TRENT','BRITANNIA','EICHERMOT','INDIGO','DIVISLAB','APOLLOHOSP']
+watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEEL','GAIL','BHEL','ONGC','BANKBARODA','WIPRO','POWERGRID','ECLERX','BPCL','NTPC','COALINDIA','TATAPOWER','BEL','PFC','ITC','VEDL','VBL','DABUR','JSWENERGY','ADANIPOWER','ATGL','AMBUJACEM','ICICIPRULI','TATAMOTORS','HINDALCO','IRCTC','HDFCLIFE','DLF','SBIN','INDUSINDBK','BAJFINANCE','LICI','ADANIGREEN','ZYDUSLIFE','JINDALSTEL','TATACONSUM','JSWSTEEL','AXISBANK','DRREDDY','GODREJCP','LODHA','UBL','ADANIPORTS','NAUKRI','RELIANCE','INFY','ICICIBANK','HCLTECH','TECHM','CHOLAFIN','CIPLA','HAVELLS','SUNPHARMA','SBILIFE','ICICIGI','BAJAJFINSV','BHARTIARTL','KOTAKBANK','HDFCBANK','NESTLEIND','ADANIENT','ASIANPAINT','HINDUNILVR','GRASIM','TVSMOTOR','TCS','PIDILITIND','SIEMENS','M&M']
 
 traded_watchlist = []
 
@@ -173,19 +177,18 @@ while True:
         available_balance = balance_response['data']['availabelBalance']
         leveraged_margin = available_balance * 5
         buy_price = chart.iloc[-1]['High']
-        target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        min_target = buy_price * 1.0125
-        target = round(max(target_get, min_target), 2)
-        stop_loss_get = chart.iloc[-4]['Low']
-        max_stop_loss = buy_price * 0.9925
-        stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
+        # target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
+        target = buy_price * 1.0125
+        # target = round(max(target_get, min_target), 2)
+        # stop_loss_get = chart.iloc[-4]['Low']
+        stop_loss = buy_price * 0.9925
+        # stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
         qty = 1 # int(leveraged_margin // buy_price)
 
         # ---- trade conditions ----
         if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * leveraged_margin:
             buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
-            oco_monitor(buy_id, target_id, sl_id)
-            sys.stdout.flush()   
+            oco_monitor(stock_name, buy_id, target_id, sl_id)
             traded_watchlist.append(stock_name)
             print("Traded stocks:", traded_watchlist)
             sys.stdout.flush()
