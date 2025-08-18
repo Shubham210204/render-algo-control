@@ -178,15 +178,15 @@ while True:
         leveraged_margin = available_balance * 5
         buy_price = chart.iloc[-1]['High']
         # target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        target = buy_price * 1.0125
+        target = buy_price * 1.005
         # target = round(max(target_get, min_target), 2)
         # stop_loss_get = chart.iloc[-4]['Low']
-        stop_loss = buy_price * 0.9925
+        stop_loss = buy_price * 0.996
         # stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
         qty = 1 # int(leveraged_margin // buy_price)
 
         # ---- trade conditions ----
-        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * leveraged_margin:
+        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * available_balance:
             buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
             oco_monitor(stock_name, buy_id, target_id, sl_id)
             traded_watchlist.append(stock_name)
