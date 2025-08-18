@@ -178,10 +178,10 @@ while True:
         leveraged_margin = available_balance * 5
         buy_price = chart.iloc[-1]['High']
         # target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        target = buy_price * 1.005
+        target = round_to_tick(buy_price * 1.005)
         # target = round(max(target_get, min_target), 2)
         # stop_loss_get = chart.iloc[-4]['Low']
-        stop_loss = buy_price * 0.996
+        stop_loss = round_to_tick(buy_price * 0.996)
         # stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
         qty = 1 # int(leveraged_margin // buy_price)
 
