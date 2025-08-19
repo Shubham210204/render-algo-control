@@ -152,10 +152,12 @@ while True:
             chart.iloc[-2]['Close'] > chart.iloc[-3]['Open'])
         red_hammer = (
             chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
+            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']) and
+            (chart.iloc[-3]['High'] - chart.iloc[-3]['Open']) < (chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
         green_hammer = (
             chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
+            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']) and
+            (chart.iloc[-3]['High'] - chart.iloc[-3]['Close']) < (chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
         white_soldiers = (
             chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
             chart.iloc[-4]['Close'] > chart.iloc[-4]['Open'] and
