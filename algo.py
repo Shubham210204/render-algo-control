@@ -69,7 +69,7 @@ def place_bracket_order(stock_name, stock_id, qty, target_price, stoploss_price)
 
     return buy_id, target_id, sl_id
 
-def oco_monitor(stock_name, buy_id, target_id, sl_id, check_interval=2):
+def oco_monitor(stock_id, buy_id, target_id, sl_id, check_interval=2):
     while True:
         target_status = dhan.get_order_by_id(target_id)['data'][0]['orderStatus']
         sl_status = dhan.get_order_by_id(sl_id)['data'][0]['orderStatus']
@@ -77,7 +77,16 @@ def oco_monitor(stock_name, buy_id, target_id, sl_id, check_interval=2):
         if current_time > datetime.time(15,00):
             print("Time up, closing all orders...")
             sys.stdout.flush()
-            dhan.cancel_order(buy_id)
+            # dhan.cancel_order(buy_id)
+            sell_order = dhan.place_order(
+                security_id=stock_id,
+                exchange_segment=dhan.NSE,
+                transaction_type=dhan.SELL,
+                quantity=qty,
+                order_type=dhan.MARKET,
+                product_type=dhan.INTRA,
+                price=0
+            )
             dhan.cancel_order(sl_id)
             dhan.cancel_order(target_id)
             break
@@ -186,7 +195,7 @@ while True:
         # ---- trade conditions ----
         if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * available_balance:
             buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
-            oco_monitor(stock_name, buy_id, target_id, sl_id)
+            oco_monitor(stock_id, buy_id, target_id, sl_id)
             traded_watchlist.append(stock_name)
             print("Traded stocks:", traded_watchlist)
             sys.stdout.flush()
