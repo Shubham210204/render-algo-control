@@ -80,10 +80,6 @@ def oco_monitor(stock_name, buy_id, target_id, sl_id, check_interval=2):
             dhan.cancel_order(buy_id)
             dhan.cancel_order(sl_id)
             dhan.cancel_order(target_id)
-            chart = get_chart(stock_name)
-            current_price = chart.iloc[-1]['Open']
-            print("Sold at price:", current_price)
-            sys.stdout.flush()
             break
         if target_status == "TRADED":
             print("Target hit! Cancelling Stop Loss order...")
