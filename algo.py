@@ -23,7 +23,7 @@ def get_instrument_token(stock_name):
         data_dict[trading_symbol][exm_ecxh_id] = row.to_dict()
     return data_dict[stock_name]['NSE']['SEM_SMST_SECURITY_ID']
 
-def place_bracket_order(tock_name, stock_id, qty, target_price, stoploss_price):
+def place_bracket_order(stock_name, stock_id, qty, target_price, stoploss_price):
     # Step 1: Place BUY order (market)
     buy_order = dhan.place_order(
         security_id=stock_id,
