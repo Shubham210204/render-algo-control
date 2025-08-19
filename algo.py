@@ -77,6 +77,8 @@ def oco_monitor(stock_id, buy_id, target_id, sl_id, check_interval=2):
         if current_time > datetime.time(15,00):
             print("Time up, closing all orders...")
             sys.stdout.flush()
+            dhan.cancel_order(sl_id)
+            dhan.cancel_order(target_id)
             # dhan.cancel_order(buy_id)
             sell_order = dhan.place_order(
                 security_id=stock_id,
@@ -87,8 +89,6 @@ def oco_monitor(stock_id, buy_id, target_id, sl_id, check_interval=2):
                 product_type=dhan.INTRA,
                 price=0
             )
-            dhan.cancel_order(sl_id)
-            dhan.cancel_order(target_id)
             break
         if target_status == "TRADED":
             print("Target hit! Cancelling Stop Loss order...")
