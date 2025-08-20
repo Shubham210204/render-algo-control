@@ -102,7 +102,7 @@ def oco_monitor(stock_id, buy_id, target_id, sl_id, check_interval=2):
             break
         time.sleep(check_interval)
 
-def round_to_tick(price, tick_size=0.05):
+def round_to_tick(price, tick_size=0.10):
     return round(round(price / tick_size) * tick_size, 2)
 
 def get_chart(stock_name):
