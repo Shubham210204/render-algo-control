@@ -119,12 +119,12 @@ def get_chart(stock_name):
     df['SMA_44'] = df['Close'].rolling(window=44).mean().round(2)
     return df
 
-def sma_rising(stock_id):
-    chart = get_chart(stock_id)
-    if chart.loc[50, 'SMA_44'] < chart.loc[74, 'SMA_44'] < chart.loc[98, 'SMA_44'] < chart.loc[122, 'SMA_44'] < chart.loc[146, 'SMA_44']:
-        return True
-    else:
-        return False
+# def sma_rising(stock_id):
+#     chart = get_chart(stock_id)
+#     if chart.loc[50, 'SMA_44'] < chart.loc[74, 'SMA_44'] < chart.loc[98, 'SMA_44'] < chart.loc[122, 'SMA_44'] < chart.loc[146, 'SMA_44']:
+#         return True
+#     else:
+#         return False
 
 watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEEL','GAIL','BHEL','ONGC','BANKBARODA','WIPRO','POWERGRID','ECLERX','BPCL','NTPC','COALINDIA','TATAPOWER','BEL','PFC','ITC','VEDL','VBL','DABUR','JSWENERGY','ADANIPOWER','ATGL','AMBUJACEM','ICICIPRULI','TATAMOTORS','HINDALCO','IRCTC','HDFCLIFE','DLF','INDUSINDBK','BAJFINANCE','LICI','ADANIGREEN','ZYDUSLIFE','JINDALSTEL','TATACONSUM','JSWSTEEL','AXISBANK','DRREDDY','GODREJCP','LODHA','UBL','ADANIPORTS','NAUKRI','RELIANCE','INFY','ICICIBANK','HCLTECH','TECHM','CHOLAFIN','CIPLA','HAVELLS','SUNPHARMA','SBILIFE','ICICIGI','BAJAJFINSV','BHARTIARTL','KOTAKBANK','HDFCBANK','NESTLEIND','ADANIENT','ASIANPAINT','HINDUNILVR','GRASIM','TVSMOTOR','TCS','PIDILITIND','SIEMENS','M&M']
 
@@ -148,17 +148,17 @@ while True:
         # ---- data fetch ----
         chart = get_chart(stock_name)
         stock_id = get_instrument_token(stock_name)
-        is_rising = sma_rising(stock_name)
+        is_rising = chart.iloc[-5]['SMA_44'] > chart.iloc[-20]['SMA_44'] > chart.iloc[-35]['SMA_44'] > chart.iloc[-50]['SMA_44'] > chart.iloc[-65]['SMA_44'] > chart.iloc[-80]['SMA_44'] > chart.iloc[-95]['SMA_44'] > chart.iloc[-110]['SMA_44'] > chart.iloc[-125]['SMA_44'] > chart.iloc[-140]['SMA_44']
 
         # ---- bullish candles ----
         engulf = (  
             chart.iloc[-3]['Open'] > chart.iloc[-3]['Close'] and
             chart.iloc[-2]['Open'] < chart.iloc[-3]['Close'] and
             chart.iloc[-2]['Close'] > chart.iloc[-3]['Open'])
-        red_hammer = (
-            chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']) and
-            (chart.iloc[-3]['High'] - chart.iloc[-3]['Open']) < (chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
+        # red_hammer = (
+        #     chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
+        #     (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']) and
+        #     (chart.iloc[-3]['High'] - chart.iloc[-3]['Open']) < (chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
         green_hammer = (
             chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
             (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']) and
@@ -175,7 +175,7 @@ while True:
         )
 
         # ---- candle formations ----
-        bullish = engulf or red_hammer or green_hammer or white_soldiers or big_green
+        bullish = engulf or green_hammer or white_soldiers or big_green
         crossover = (chart.iloc[-2]['Low'] < chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['High'] > chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['Open'] < chart.iloc[-2]['Close'])
         confirmation = chart.iloc[-1]['High'] > chart.iloc[-2]['High']
 
