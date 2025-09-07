@@ -109,8 +109,8 @@ def get_chart(stock_name):
     stock = yf.Ticker(stock_name + ".NS")
     df = stock.history(interval="5m", period="3d")
     df.reset_index(inplace=True)
-    df = df[['Datetime', 'Open', 'High', 'Low', 'Close']]
-    df.rename(columns={'Datetime': 'timestamp'}, inplace=True)
+    df = df[['Date', 'Open', 'High', 'Low', 'Close']]
+    df.rename(columns={'Date': 'timestamp'}, inplace=True)
     df['timestamp'] = df['timestamp'].dt.tz_localize(None)
 
     for col in ['Open', 'High', 'Low', 'Close']:
@@ -185,10 +185,10 @@ while True:
         leveraged_margin = available_balance * 5
         buy_price = chart.iloc[-1]['High']
         # target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        target = round_to_tick(buy_price * 1.005)
+        target = round_to_tick(buy_price * 1.004)
         # target = round(max(target_get, min_target), 2)
         # stop_loss_get = chart.iloc[-4]['Low']
-        stop_loss = round_to_tick(buy_price * 0.996)
+        stop_loss = round_to_tick(buy_price * 0.9965)
         # stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
         qty = 1 # int(leveraged_margin // buy_price)
 
