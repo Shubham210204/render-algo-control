@@ -109,8 +109,8 @@ def get_chart(stock_name):
     stock = yf.Ticker(stock_name + ".NS")
     df = stock.history(interval="5m", period="3d")
     df.reset_index(inplace=True)
-    df = df[['Date', 'Open', 'High', 'Low', 'Close']]
-    df.rename(columns={'Date': 'timestamp'}, inplace=True)
+    df = df[['Datetime', 'Open', 'High', 'Low', 'Close']]
+    df.rename(columns={'Datetime': 'timestamp'}, inplace=True)
     df['timestamp'] = df['timestamp'].dt.tz_localize(None)
 
     for col in ['Open', 'High', 'Low', 'Close']:
