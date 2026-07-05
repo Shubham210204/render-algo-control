@@ -1,4 +1,4 @@
-from dhanhq import dhanhq
+from dhanhq import DhanContext, dhanhq
 import pandas as pd
 import yfinance as yf
 import datetime
@@ -10,7 +10,8 @@ from zoneinfo import ZoneInfo
 # ---- credentials ----
 client_id = os.getenv("client_id")
 access_token = os.getenv("access_token")
-dhan = dhanhq(client_id, access_token)
+dhan_context = DhanContext(client_id, access_token)
+dhan = dhanhq(dhan_context)
 
 def get_instrument_token(stock_name):
     df = pd.read_csv('api-scrip-master.csv')
