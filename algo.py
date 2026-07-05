@@ -7,14 +7,6 @@ import os
 import sys
 from zoneinfo import ZoneInfo
 
-import inspect
-
-print("="*60)
-print("Module location:", dhanhq.__file__)
-print("Version:", getattr(dhanhq, "__version__", "Unknown"))
-print("Constructor:", inspect.signature(dhanhq.dhanhq.__init__))
-print("="*60)
-
 # ---- credentials ----
 client_id = os.getenv("client_id")
 access_token = os.getenv("access_token")
