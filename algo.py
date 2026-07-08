@@ -107,19 +107,8 @@ def round_to_tick(price, tick_size=0.10):
     return round(round(price / tick_size) * tick_size, 2)
 
 def get_chart(stock_name):
-    try:
-        stock = yf.Ticker(stock_name + ".NS")
-        df = stock.history(interval="5m", period="3d")
-    except Exception as e:
-        print(f"[{stock_name}] yfinance fetch failed: {e}")
-        sys.stdout.flush()
-        return None
-
-    if df is None or df.empty or 'Close' not in df.columns:
-        print(f"[{stock_name}] no data returned, skipping this pass")
-        sys.stdout.flush()
-        return None
-
+    stock = yf.Ticker(stock_name + ".NS")
+    df = stock.history(interval="5m", period="3d")
     df.reset_index(inplace=True)
     df = df[['Datetime', 'Open', 'High', 'Low', 'Close']]
     df.rename(columns={'Datetime': 'timestamp'}, inplace=True)
@@ -129,12 +118,6 @@ def get_chart(stock_name):
         df[col] = df[col].apply(round_to_tick)
 
     df['SMA_44'] = df['Close'].rolling(window=44).mean().round(2)
-
-    if len(df) < 140:
-        print(f"[{stock_name}] only {len(df)} candles returned, skipping this pass")
-        sys.stdout.flush()
-        return None
-
     return df
 
 # def sma_rising(stock_id):
