@@ -8,10 +8,13 @@ import sys
 from zoneinfo import ZoneInfo
 
 # ---- credentials ----
+from dotenv import load_dotenv
+load_dotenv()
 client_id = os.getenv("client_id")
 access_token = os.getenv("access_token")
 dhan_context = DhanContext(client_id, access_token)
 dhan = dhanhq(dhan_context)
+
 
 def get_instrument_token(stock_name):
     df = pd.read_csv('api-scrip-master.csv')
@@ -120,88 +123,21 @@ def get_chart(stock_name):
     df['SMA_44'] = df['Close'].rolling(window=44).mean().round(2)
     return df
 
-# def sma_rising(stock_id):
-#     chart = get_chart(stock_id)
-#     if chart.loc[50, 'SMA_44'] < chart.loc[74, 'SMA_44'] < chart.loc[98, 'SMA_44'] < chart.loc[122, 'SMA_44'] < chart.loc[146, 'SMA_44']:
-#         return True
-#     else:
-#         return False
-
-watchlist = ['NHPC','MOTHERSON','PNB','CANBK','IRFC','UNIONBANK','IOC','TATASTEEL','GAIL','BHEL','ONGC','BANKBARODA','WIPRO','POWERGRID','ECLERX','BPCL','NTPC','COALINDIA','TATAPOWER','BEL','PFC','ITC','VEDL','VBL','DABUR','JSWENERGY','ADANIPOWER','ATGL','AMBUJACEM','ICICIPRULI','HINDALCO','IRCTC','HDFCLIFE','DLF','INDUSINDBK','BAJFINANCE','LICI','ADANIGREEN','ZYDUSLIFE','JINDALSTEL','TATACONSUM','JSWSTEEL','AXISBANK','DRREDDY','GODREJCP','LODHA','UBL','ADANIPORTS','NAUKRI','RELIANCE','INFY','ICICIBANK','HCLTECH','TECHM','CHOLAFIN','CIPLA','HAVELLS','SUNPHARMA','SBILIFE','ICICIGI','BAJAJFINSV','BHARTIARTL','KOTAKBANK','HDFCBANK','NESTLEIND','ADANIENT','ASIANPAINT','HINDUNILVR','GRASIM','TVSMOTOR','TCS','PIDILITIND','SIEMENS','M&M']
-
-traded_watchlist = []
-
-while True:
-     # ---- time preferences ----
-     current_time = datetime.datetime.now(ZoneInfo("Asia/Kolkata")).time()
-     if current_time < datetime.time(9, 20):
-          print("wait for market to start", current_time)
-          sys.stdout.flush()
-          time.sleep(300)
-          continue
-     if current_time > datetime.time(15,00):
-          print("Market is over, Bye Bye see you tomorrow", current_time)
-          sys.stdout.flush()
-          break
+stock_name = 'HDFCBANK'
+chart = get_chart(stock_name)
+stock_id = get_instrument_token(stock_name)
      
-     # ---- loop for each stock ----
-     for stock_name in watchlist:
-        # ---- data fetch ----
-        chart = get_chart(stock_name)
-        if chart is None:
-            continue
-        stock_id = get_instrument_token(stock_name)
-        is_rising = chart.iloc[-5]['SMA_44'] > chart.iloc[-20]['SMA_44'] > chart.iloc[-35]['SMA_44'] > chart.iloc[-50]['SMA_44'] > chart.iloc[-65]['SMA_44'] > chart.iloc[-80]['SMA_44'] > chart.iloc[-95]['SMA_44'] > chart.iloc[-110]['SMA_44'] > chart.iloc[-125]['SMA_44'] > chart.iloc[-140]['SMA_44']
+balance_response = dhan.get_fund_limits()
+available_balance = balance_response['data']['availabelBalance']
+leveraged_margin = available_balance * 5
+buy_price = chart.iloc[-1]['High']
+# target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
+target = round_to_tick(buy_price * 1.004)
+# target = round(max(target_get, min_target), 2)
+# stop_loss_get = chart.iloc[-4]['Low']
+stop_loss = round_to_tick(buy_price * 0.9965)
+# stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
+qty = 1 # int(leveraged_margin // buy_price)
 
-        # ---- bullish candles ----
-        engulf = (  
-            chart.iloc[-3]['Open'] > chart.iloc[-3]['Close'] and
-            chart.iloc[-2]['Open'] < chart.iloc[-3]['Close'] and
-            chart.iloc[-2]['Close'] > chart.iloc[-3]['Open'])
-        # red_hammer = (
-        #     chart.iloc[-3]['Close'] < chart.iloc[-3]['Open'] and
-        #     (chart.iloc[-3]['Close'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']) and
-        #     (chart.iloc[-3]['High'] - chart.iloc[-3]['Open']) < (chart.iloc[-3]['Open'] - chart.iloc[-3]['Close']))
-        green_hammer = (
-            chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
-            (chart.iloc[-3]['Open'] - chart.iloc[-3]['Low']) >= 4 * abs(chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']) and
-            (chart.iloc[-3]['High'] - chart.iloc[-3]['Close']) < (chart.iloc[-3]['Close'] - chart.iloc[-3]['Open']))
-        white_soldiers = (
-            chart.iloc[-3]['Close'] > chart.iloc[-3]['Open'] and
-            chart.iloc[-4]['Close'] > chart.iloc[-4]['Open'] and
-            chart.iloc[-3]['Close'] > chart.iloc[-4]['Close'] and
-            chart.iloc[-4]['Close'] > chart.iloc[-5]['Close'])
-        big_green = (
-            chart.iloc[-2]['Open'] == chart.iloc[-2]['Low'] and
-            chart.iloc[-2]['Close'] == chart.iloc[-2]['High'] and
-            chart.iloc[-2]['Close'] > chart.iloc[-2]['Open']
-        )
-
-        # ---- candle formations ----
-        bullish = engulf or green_hammer or white_soldiers or big_green
-        crossover = (chart.iloc[-2]['Low'] < chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['High'] > chart.iloc[-2]['SMA_44']) and (chart.iloc[-2]['Open'] < chart.iloc[-2]['Close'])
-        confirmation = chart.iloc[-1]['High'] > chart.iloc[-2]['High']
-
-        # ---- trade value calculation ----
-        balance_response = dhan.get_fund_limits()
-        available_balance = balance_response['data']['availabelBalance']
-        leveraged_margin = available_balance * 5
-        buy_price = chart.iloc[-1]['High']
-        # target_get = buy_price + 2.5 * (chart.iloc[-2]['High'] - chart.iloc[-2]['Low'])
-        target = round_to_tick(buy_price * 1.004)
-        # target = round(max(target_get, min_target), 2)
-        # stop_loss_get = chart.iloc[-4]['Low']
-        stop_loss = round_to_tick(buy_price * 0.9965)
-        # stop_loss = round(min(stop_loss_get, max_stop_loss), 2)
-        qty = 1 # int(leveraged_margin // buy_price)
-
-        # ---- trade conditions ----
-        if crossover and confirmation and bullish and stock_name not in traded_watchlist and is_rising and buy_price < 3 * available_balance:
-            buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
-            oco_monitor(stock_id, buy_id, target_id, sl_id)
-            traded_watchlist.append(stock_name)
-            print("Traded stocks:", traded_watchlist)
-            sys.stdout.flush()
-
-print("🛑 Script ended!!")
-sys.stdout.flush()
+buy_id, target_id, sl_id = place_bracket_order(stock_name, stock_id, qty, target, stop_loss)
+oco_monitor(stock_id, buy_id, target_id, sl_id)
